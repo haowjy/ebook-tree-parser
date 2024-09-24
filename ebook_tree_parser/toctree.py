@@ -34,6 +34,26 @@ def GET_ESTIMATOR(source: str, encoding_name:str='cl100k_base') -> Callable[[str
                 return lambda x: len(encoding.encode(x))
         except ImportError:
             pass
+
+def simple_token_estimator(text: str) -> int:
+    """Simple token estimator that estimates the number of tokens based on:
+    
+    1 token ~= 4 chars in English
+    1 token ~= 3/4 words
+    
+    and taking the average of the two.
+
+    Args:
+        text (str): The text to estimate the number of tokens in.
+
+    Returns:
+        int: The estimated number of tokens in the text.
+    """
+    word_count = len(text.split(" "))
+    char_count = len(text)
+    tokens_count_word_est = word_count / 0.75
+    tokens_count_char_est = char_count / 4.0
+    return (tokens_count_word_est + tokens_count_char_est) / 2
     
 def has_text(tag):
     return tag.string is not None and tag.string.strip()
@@ -226,9 +246,9 @@ class TocNode(dict):
             self.element = soup.find(has_text) # find the first element with text
             return self.element
     
-    def set_content(self, content: str, token_estimator: Callable[[str], int] = None):
+    def set_content(self, content: str, token_estimator: Callable[[str], int]):
         self.content = content
-        if token_estimator: self.content_token_count = token_estimator(content)
+        self.content_token_count = token_estimator(content)
         
     def set_tok_count(self, token_estimator: Callable[[str], int]):
         if token_estimator: self.content_token_count = token_estimator(self.content)
@@ -264,8 +284,9 @@ class TocTree:
             book (epub.EpubBook): Epub book object
             token_estimater (Callable[[str], int], optional): Function to estimate the number of tokens in a string. Defaults to None.
         """
-
-        self.token_estimator = token_estimator
+        
+        self.token_estimator = token_estimator or simple_token_estimator # default to simple token estimator if not provided
+        
         self.book = book
         
         self.root: TocNode = TocNode('root')
