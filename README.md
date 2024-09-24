@@ -21,3 +21,9 @@ for node in tree3:
     print(f"{node.title}|{node.content_token_count}\n{node.content[:50]}")
     print("----")
 ```
+
+## Development
+
+1. Create a virtual environment
+2. pip install -e .
+3. Make sure to update pyproject.toml with the correct dependencies
