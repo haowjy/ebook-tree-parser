@@ -25,5 +25,6 @@ for node in tree3:
 ## Development
 
 1. Create a virtual environment
-2. pip install -e .
+2. pip install -e . --config-settings editable_mode=strict
+   * <https://stackoverflow.com/a/76897706>
 3. Make sure to update pyproject.toml with the correct dependencies
